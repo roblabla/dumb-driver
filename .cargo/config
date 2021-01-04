@@ -1,0 +1,24 @@
+[build]
+rustflags = [
+    "-C", "panic=abort",
+
+    # Pre link args
+    "-C", "link-arg=/NOLOGO",
+    "-C", "link-arg=/NXCOMPAT",
+    "-C", "link-arg=/NODEFAULTLIB",
+    "-C", "link-arg=/SUBSYSTEM:NATIVE",
+    "-C", "link-arg=/DRIVER",
+    "-C", "link-arg=/DYNAMICBASE",
+    "-C", "link-arg=/MANIFEST:NO",
+    "-C", "link-arg=/PDBALTPATH:none",
+
+    # Post link args
+    "-C", "link-arg=/OPT:REF,ICF",
+    "-C", "link-arg=/ENTRY:driver_entry",
+    "-C", "link-arg=/MERGE:.edata=.rdata",
+    "-C", "link-arg=/MERGE:.rustc=.data",
+    "-C", "link-arg=/INTEGRITYCHECK",
+]
+
+#[target.x86_64-kernel-windows-msvc]
+#linker = "rust-lld"

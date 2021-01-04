@@ -1,0 +1,48 @@
+[config]
+skip_core_tasks = true
+min_version = "0.30.8"
+default_to_workspace = false
+init_task = "init"
+
+[env]
+RUST_TARGET_PATH = "${CARGO_MAKE_WORKING_DIRECTORY}"
+
+#### Profile-specific flags
+# Which subfolder of target will rustc put its files into. Target is
+# automatically prepended if necessary.
+PROFILE_NAME = "debug"
+# Flags to pass to cargo when building any project.
+COMPILER_FLAGS = ""
+
+[env.development]
+PROFILE_NAME = "debug"
+COMPILER_FLAGS = ""
+
+[env.production]
+PROFILE_NAME = "release"
+COMPILER_FLAGS = "--release"
+
+[tasks.init]
+install_crate = { rustup_component_name = "rust-src" }
+
+[tasks.build]
+description = "Build the driver"
+command = "cargo"
+args = ["build", "-Zbuild-std", "--target=x86_64-kernel-windows-msvc", "@@split(COMPILER_FLAGS, )"]
+
+[tasks.package]
+description = "Create a ZIP file containing the .sys, .inf and .cat"
+dependencies = ["build"]
+script = [
+'''
+mkdir -p tmp
+cp target/x86_64-kernel-windows-msvc/${PROFILE_NAME}/windows_driver_test.dll tmp/windows_driver_test.sys
+cp windows_driver_test.inf tmp/
+# TODO: Create cat file.
+zip -r dist.zip tmp/
+rm -rf tmp/
+'''
+]
+
+[tasks.default]
+run_task = "package"
